@@ -1,0 +1,51 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+Description: AWS Hands-on for Beginners - Serverless 2
+Resources:
+  TranslateLambda:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: translate-function-2
+      CodeUri: s3://hirata-automation-tranlate-serverless-s3/3f6d23007fbe17d69faf5588d271ea0e
+      Handler: translate-function.lambda_handler
+      Runtime: python3.12
+      Timeout: 10
+      MemorySize: 256
+      Policies:
+      - TranslateFullAccess
+      - AmazonDynamoDBFullAccess
+      Events:
+        GetApi:
+          Type: Api
+          Properties:
+            Path: /translate
+            Method: get
+            RestApiId:
+              Ref: TranslateAPI
+        PostApi:
+          Type: Api
+          Properties:
+            Path: /translate
+            Method: post
+            RestApiId:
+              Ref: TranslateAPI
+  TranslateAPI:
+    Type: AWS::Serverless::Api
+    Properties:
+      Name: translate-api-2
+      StageName: dev
+      EndpointConfiguration: REGIONAL
+      Cors:
+        AllowMethods: "'GET,POST,OPTIONS'"
+        AllowHeaders: "'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token'"
+        AllowOrigin: "'*'"
+  TranslateDynamoDbTbl:
+    Type: AWS::Serverless::SimpleTable
+    Properties:
+      TableName: translate-history-2
+      PrimaryKey:
+        Name: timestamp
+        Type: String
+      ProvisionedThroughput:
+        ReadCapacityUnits: 1
+        WriteCapacityUnits: 1
